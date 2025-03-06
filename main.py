@@ -103,13 +103,11 @@ class CalculatorApp(ft.Container):
         )
 
     def did_mount(self):
-        """Called when the control is added to the page"""
         self.load_history()
         self.update_history_panel()
 
     def load_history(self):
-        """Load history from client storage"""
-        history_data = self.page.client_storage.get('history')
+        history_data = self.page.client_storage.get("history")
         if history_data:
             try:
                 self.history = json.loads(history_data)
@@ -117,9 +115,8 @@ class CalculatorApp(ft.Container):
                 self.history = []
 
     def save_history(self):
-        """Save history to client storage"""
         history_data = json.dumps(self.history)
-        self.page.client_storage.set('history', history_data)
+        self.page.client_storage.set("history", history_data)
 
     def toggle_history(self, e):
         self.show_history = not self.show_history
@@ -254,6 +251,5 @@ def main(page: ft.Page):
     page.title = "Calc App"
     calc = CalculatorApp(page)
     page.add(calc)
-    calc.did_mount()  # Trigger post-mount initialization
 
-ft.app(target=main)
+app = ft.app(target=main)
