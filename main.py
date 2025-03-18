@@ -102,13 +102,11 @@ class CalculatorApp(ft.Container):
             ]
         )
 
-    def did_mount(self):
-        """Called when the control is added to the page"""
+    async def did_mount(self):
         self.load_history()
         self.update_history_panel()
 
     def load_history(self):
-        """Load history from client storage"""
         history_data = self.page.client_storage.get('history')
         if history_data:
             try:
@@ -117,14 +115,13 @@ class CalculatorApp(ft.Container):
                 self.history = []
 
     def save_history(self):
-        """Save history to client storage"""
         history_data = json.dumps(self.history)
         self.page.client_storage.set('history', history_data)
 
-    def toggle_history(self, e):
+    async def toggle_history(self, e):
         self.show_history = not self.show_history
         self.history_panel.visible = self.show_history
-        self.update()
+        await self.update_async()
 
     def build_history_panel(self):
         self.history_panel = ft.Container(
@@ -142,7 +139,7 @@ class CalculatorApp(ft.Container):
         )
         return self.history_panel
 
-    def button_clicked(self, e):
+    async def button_clicked(self, e):
         data = e.control.data
         if data in ("AC", "CE"):
             if data == "CE":
@@ -201,9 +198,9 @@ class CalculatorApp(ft.Container):
                 self.result.value = self.expression.value
 
         self.current_operand_start = len(self.expression.value)
-        self.update()
+        await self.update_async()
 
-    def update_history_panel(self):
+    async def update_history_panel(self):
         history_controls = []
         for idx, entry in enumerate(reversed(self.history)):
             entry_row_index = len(self.history) - 1 - idx
@@ -228,16 +225,16 @@ class CalculatorApp(ft.Container):
             )
             history_controls.append(entry_row)
         self.history_panel.content.controls = history_controls
-        self.update()
+        await self.update_async()
 
-    def delete_history_entry(self, index):
+    async def delete_history_entry(self, index):
         if 0 <= index < len(self.history):
             del self.history[index]
             self.save_history()
-            self.update_history_panel()
+            await self.update_history_panel()
 
-    def copy_to_clipboard(self, result):
-        ft.clipboard.set(result)
+    async def copy_to_clipboard(self, result):
+        await self.page.set_clipboard_async(result)
 
     def format_number(self, num):
         if isinstance(num, float):
@@ -250,10 +247,22 @@ class CalculatorApp(ft.Container):
                 return f"{integer_part}.{decimal_part}" if decimal_part else integer_part
         return str(num).replace(',', ' ')
 
-def main(page: ft.Page):
-    page.title = "Calc App"
-    calc = CalculatorApp(page)
-    page.add(calc)
-    calc.did_mount()  # Trigger post-mount initialization
+async def main(page: ft.Page):
+    page.title = "Calculator App"
+    page.horizontal_alignment = "center"
+    page.vertical_alignment = "center"
+    page.bgcolor = ft.colors.GREY_900
+    page.padding = 20
+    
+    calculator = CalculatorApp(page)
+    await page.add_async(
+        ft.Container(
+            calculator,
+            border_radius=ft.border_radius.all(20),
+            shadow=ft.BoxShadow(blur_radius=100)
+        )
+    )
+    await calculator.did_mount()
 
-ft.app(target=main)
+from flet import asgi_app
+app = asgi_app(main, assets_dir="assets")
