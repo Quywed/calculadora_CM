@@ -103,12 +103,10 @@ class CalculatorApp(ft.Container):
         )
 
     def did_mount(self):
-        """Called when the control is added to the page"""
         self.load_history()
         self.update_history_panel()
 
     def load_history(self):
-        """Load history from client storage"""
         history_data = self.page.client_storage.get('history')
         if history_data:
             try:
@@ -117,7 +115,6 @@ class CalculatorApp(ft.Container):
                 self.history = []
 
     def save_history(self):
-        """Save history to client storage"""
         history_data = json.dumps(self.history)
         self.page.client_storage.set('history', history_data)
 
