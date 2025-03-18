@@ -254,6 +254,6 @@ def main(page: ft.Page):
     page.title = "Calc App"
     calc = CalculatorApp(page)
     page.add(calc)
-    calc.did_mount()  # Trigger post-mount initialization
+    calc.did_mount()  
 
 ft.app(target=main)
